@@ -1,0 +1,358 @@
+{
+  "yearly": [
+    {
+      "year": 2017,
+      "SC": 50.7,
+      "ST": 8.6,
+      "Women": 335.2,
+      "Children": 142.9
+    },
+    {
+      "year": 2018,
+      "SC": 50.0,
+      "ST": 7.9,
+      "Women": 348.0,
+      "Children": 157.1
+    },
+    {
+      "year": 2019,
+      "SC": 52.9,
+      "ST": 9.8,
+      "Women": 353.6,
+      "Children": 161.9
+    },
+    {
+      "year": 2020,
+      "SC": 55.9,
+      "ST": 9.6,
+      "Women": 332.4,
+      "Children": 139.8
+    },
+    {
+      "year": 2021,
+      "SC": 56.1,
+      "ST": 10.1,
+      "Women": 357.8,
+      "Children": 159.1
+    },
+    {
+      "year": 2022,
+      "SC": 61.7,
+      "ST": 11.3,
+      "Women": 358.6,
+      "Children": 167.3
+    }
+  ],
+  "top_states": [
+    "Uttar Pradesh",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Rajasthan",
+    "Andhra Pradesh",
+    "West Bengal",
+    "Kerala",
+    "Delhi",
+    "Odisha",
+    "Haryana"
+  ],
+  "state_trends": {
+    "Uttar Pradesh": [
+      {
+        "year": 2017,
+        "avg": 235.1
+      },
+      {
+        "year": 2018,
+        "avg": 245.1
+      },
+      {
+        "year": 2019,
+        "avg": 243.2
+      },
+      {
+        "year": 2020,
+        "avg": 218.6
+      },
+      {
+        "year": 2021,
+        "avg": 229.9
+      },
+      {
+        "year": 2022,
+        "avg": 252.4
+      }
+    ],
+    "Madhya Pradesh": [
+      {
+        "year": 2017,
+        "avg": 236.7
+      },
+      {
+        "year": 2018,
+        "avg": 223.7
+      },
+      {
+        "year": 2019,
+        "avg": 220.4
+      },
+      {
+        "year": 2020,
+        "avg": 220.1
+      },
+      {
+        "year": 2021,
+        "avg": 243.5
+      },
+      {
+        "year": 2022,
+        "avg": 252.1
+      }
+    ],
+    "Maharashtra": [
+      {
+        "year": 2017,
+        "avg": 210.7
+      },
+      {
+        "year": 2018,
+        "avg": 227.9
+      },
+      {
+        "year": 2019,
+        "avg": 232.7
+      },
+      {
+        "year": 2020,
+        "avg": 209.0
+      },
+      {
+        "year": 2021,
+        "avg": 226.4
+      },
+      {
+        "year": 2022,
+        "avg": 248.0
+      }
+    ],
+    "Rajasthan": [
+      {
+        "year": 2017,
+        "avg": 180.8
+      },
+      {
+        "year": 2018,
+        "avg": 188.5
+      },
+      {
+        "year": 2019,
+        "avg": 235.6
+      },
+      {
+        "year": 2020,
+        "avg": 224.0
+      },
+      {
+        "year": 2021,
+        "avg": 242.1
+      },
+      {
+        "year": 2022,
+        "avg": 263.9
+      }
+    ],
+    "Andhra Pradesh": [
+      {
+        "year": 2017,
+        "avg": 205.0
+      },
+      {
+        "year": 2018,
+        "avg": 203.3
+      },
+      {
+        "year": 2019,
+        "avg": 214.7
+      },
+      {
+        "year": 2020,
+        "avg": 215.2
+      },
+      {
+        "year": 2021,
+        "avg": 220.9
+      },
+      {
+        "year": 2022,
+        "avg": 214.1
+      }
+    ],
+    "West Bengal": [
+      {
+        "year": 2017,
+        "avg": 189.9
+      },
+      {
+        "year": 2018,
+        "avg": 183.8
+      },
+      {
+        "year": 2019,
+        "avg": 185.7
+      },
+      {
+        "year": 2020,
+        "avg": 211.5
+      },
+      {
+        "year": 2021,
+        "avg": 210.4
+      },
+      {
+        "year": 2022,
+        "avg": 203.9
+      }
+    ],
+    "Kerala": [
+      {
+        "year": 2017,
+        "avg": 180.5
+      },
+      {
+        "year": 2018,
+        "avg": 183.0
+      },
+      {
+        "year": 2019,
+        "avg": 200.5
+      },
+      {
+        "year": 2020,
+        "avg": 174.9
+      },
+      {
+        "year": 2021,
+        "avg": 205.9
+      },
+      {
+        "year": 2022,
+        "avg": 227.4
+      }
+    ],
+    "Delhi": [
+      {
+        "year": 2017,
+        "avg": 199.8
+      },
+      {
+        "year": 2018,
+        "avg": 205.4
+      },
+      {
+        "year": 2019,
+        "avg": 202.3
+      },
+      {
+        "year": 2020,
+        "avg": 164.1
+      },
+      {
+        "year": 2021,
+        "avg": 196.3
+      },
+      {
+        "year": 2022,
+        "avg": 199.4
+      }
+    ],
+    "Odisha": [
+      {
+        "year": 2017,
+        "avg": 157.0
+      },
+      {
+        "year": 2018,
+        "avg": 174.7
+      },
+      {
+        "year": 2019,
+        "avg": 191.0
+      },
+      {
+        "year": 2020,
+        "avg": 195.7
+      },
+      {
+        "year": 2021,
+        "avg": 216.6
+      },
+      {
+        "year": 2022,
+        "avg": 214.0
+      }
+    ],
+    "Haryana": [
+      {
+        "year": 2017,
+        "avg": 147.1
+      },
+      {
+        "year": 2018,
+        "avg": 181.0
+      },
+      {
+        "year": 2019,
+        "avg": 192.1
+      },
+      {
+        "year": 2020,
+        "avg": 177.4
+      },
+      {
+        "year": 2021,
+        "avg": 210.4
+      },
+      {
+        "year": 2022,
+        "avg": 217.5
+      }
+    ]
+  },
+  "all_states": [
+    "Andaman And Nicobar Islands",
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chandigarh",
+    "Chhattisgarh",
+    "Delhi",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jammu And Kashmir",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Ladakh",
+    "Lakshadweep",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Puducherry",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "The Dadra And Nagar Haveli And Daman And Diu",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal"
+  ]
+}

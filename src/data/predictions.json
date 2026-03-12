@@ -1,0 +1,950 @@
+{
+  "model": "FC-MT-LSTM",
+  "training_time_min": 10.1,
+  "overall": {
+    "mae": 8.49,
+    "rmse": 13.71,
+    "r2": 0.9966,
+    "fairness_ratio": 12.68,
+    "fairness_gap": 10.98
+  },
+  "group_metrics": {
+    "SC": {
+      "mae": 3.29,
+      "rmse": 5.07,
+      "r2": 0.9882,
+      "count": 78,
+      "color": "#64B5F6"
+    },
+    "ST": {
+      "mae": 0.94,
+      "rmse": 0.99,
+      "r2": -9.8937,
+      "count": 10,
+      "color": "#81C784"
+    },
+    "Women": {
+      "mae": 11.15,
+      "rmse": 14.19,
+      "r2": 0.998,
+      "count": 80,
+      "color": "#FF7043"
+    },
+    "Children": {
+      "mae": 11.92,
+      "rmse": 18.98,
+      "r2": 0.9915,
+      "count": 78,
+      "color": "#FFB74D"
+    }
+  },
+  "state_preds": [
+    {
+      "state": "Arunachal Pradesh",
+      "actual": 2.7,
+      "predicted": 4.6
+    },
+    {
+      "state": "Assam",
+      "actual": 78.7,
+      "predicted": 76.7
+    },
+    {
+      "state": "Bihar",
+      "actual": 0.0,
+      "predicted": 3.9
+    },
+    {
+      "state": "Delhi",
+      "actual": 208.1,
+      "predicted": 197.2
+    },
+    {
+      "state": "Gujarat",
+      "actual": 2.5,
+      "predicted": 5.0
+    },
+    {
+      "state": "Himachal Pradesh",
+      "actual": 41.7,
+      "predicted": 43.9
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "actual": 5.4,
+      "predicted": 7.6
+    },
+    {
+      "state": "Karnataka",
+      "actual": 59.5,
+      "predicted": 58.1
+    },
+    {
+      "state": "Kerala",
+      "actual": 226.3,
+      "predicted": 212.9
+    },
+    {
+      "state": "Madhya Pradesh",
+      "actual": 252.7,
+      "predicted": 238.4
+    },
+    {
+      "state": "Maharashtra",
+      "actual": 384.6,
+      "predicted": 365.5
+    },
+    {
+      "state": "Manipur",
+      "actual": 0.0,
+      "predicted": 4.4
+    },
+    {
+      "state": "Mizoram",
+      "actual": 0.0,
+      "predicted": 4.2
+    },
+    {
+      "state": "Odisha",
+      "actual": 66.3,
+      "predicted": 63.4
+    },
+    {
+      "state": "Punjab",
+      "actual": 60.5,
+      "predicted": 59.7
+    },
+    {
+      "state": "Rajasthan",
+      "actual": 183.9,
+      "predicted": 178.8
+    },
+    {
+      "state": "Tamil Nadu",
+      "actual": 23.0,
+      "predicted": 27.6
+    },
+    {
+      "state": "Telangana",
+      "actual": 8.3,
+      "predicted": 8.2
+    },
+    {
+      "state": "Uttar Pradesh",
+      "actual": 0.0,
+      "predicted": 5.9
+    },
+    {
+      "state": "Uttarakhand",
+      "actual": 0.0,
+      "predicted": 3.6
+    },
+    {
+      "state": "West Bengal",
+      "actual": 330.1,
+      "predicted": 316.7
+    }
+  ],
+  "samples": [
+    {
+      "state": "West Bengal",
+      "district": "South 24 Parganas",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.4
+    },
+    {
+      "state": "West Bengal",
+      "district": "North 24 Parganas",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.5
+    },
+    {
+      "state": "West Bengal",
+      "district": "North 24 Parganas",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.1
+    },
+    {
+      "state": "West Bengal",
+      "district": "North 24 Parganas",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 724.2
+    },
+    {
+      "state": "West Bengal",
+      "district": "Darjeeling",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 721.7
+    },
+    {
+      "state": "West Bengal",
+      "district": "Howrah",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 721.8
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.5
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 724.3
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 725.8
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 721.9
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "Children",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 695.3
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "Children",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 694.8
+    },
+    {
+      "state": "Kerala",
+      "district": "Thiruvananthapuram",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.5
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 722.2
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Thane",
+      "group": "Children",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 701.2
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 723.3
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Thane",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 722.2
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 727.4
+    },
+    {
+      "state": "Assam",
+      "district": "Kamrup Metro",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 724.9
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Children",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 696.1
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 723.3
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 713.3
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Women",
+      "year": 2022,
+      "actual": 742.0,
+      "predicted": 726.2
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 724.0,
+      "predicted": 692.0
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 683.0,
+      "predicted": 666.9
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Children",
+      "year": 2022,
+      "actual": 616.0,
+      "predicted": 593.4
+    },
+    {
+      "state": "Kerala",
+      "district": "Thiruvananthapuram",
+      "group": "Children",
+      "year": 2022,
+      "actual": 575.0,
+      "predicted": 498.1
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Children",
+      "year": 2022,
+      "actual": 559.0,
+      "predicted": 543.8
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Nagpur",
+      "group": "Women",
+      "year": 2022,
+      "actual": 459.0,
+      "predicted": 433.0
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Children",
+      "year": 2022,
+      "actual": 451.0,
+      "predicted": 407.6
+    },
+    {
+      "state": "Odisha",
+      "district": "Sundargarh",
+      "group": "Women",
+      "year": 2022,
+      "actual": 437.0,
+      "predicted": 401.8
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "Women",
+      "year": 2022,
+      "actual": 436.0,
+      "predicted": 411.9
+    },
+    {
+      "state": "Assam",
+      "district": "Kamrup Metro",
+      "group": "Children",
+      "year": 2022,
+      "actual": 422.0,
+      "predicted": 375.9
+    },
+    {
+      "state": "Punjab",
+      "district": "S.A.S Nagar",
+      "group": "Women",
+      "year": 2022,
+      "actual": 411.0,
+      "predicted": 387.1
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "Children",
+      "year": 2022,
+      "actual": 313.0,
+      "predicted": 269.6
+    },
+    {
+      "state": "West Bengal",
+      "district": "24 Paraganas North",
+      "group": "Children",
+      "year": 2022,
+      "actual": 295.0,
+      "predicted": 264.6
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 291.0,
+      "predicted": 275.5
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Nagpur",
+      "group": "Children",
+      "year": 2022,
+      "actual": 285.0,
+      "predicted": 255.6
+    },
+    {
+      "state": "West Bengal",
+      "district": "24 Paraganas South",
+      "group": "Children",
+      "year": 2022,
+      "actual": 275.0,
+      "predicted": 240.6
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "Children",
+      "year": 2022,
+      "actual": 266.0,
+      "predicted": 247.0
+    },
+    {
+      "state": "West Bengal",
+      "district": "Darjeeling",
+      "group": "Children",
+      "year": 2022,
+      "actual": 263.0,
+      "predicted": 241.5
+    },
+    {
+      "state": "West Bengal",
+      "district": "24 Paraganas North",
+      "group": "Children",
+      "year": 2022,
+      "actual": 260.0,
+      "predicted": 246.5
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "Children",
+      "year": 2022,
+      "actual": 257.0,
+      "predicted": 246.2
+    },
+    {
+      "state": "West Bengal",
+      "district": "Howrah",
+      "group": "Children",
+      "year": 2022,
+      "actual": 244.0,
+      "predicted": 224.4
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "group": "Women",
+      "year": 2022,
+      "actual": 230.0,
+      "predicted": 196.0
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "Children",
+      "year": 2022,
+      "actual": 222.0,
+      "predicted": 202.8
+    },
+    {
+      "state": "Karnataka",
+      "district": "Belagavi",
+      "group": "Women",
+      "year": 2022,
+      "actual": 205.0,
+      "predicted": 203.0
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 202.0,
+      "predicted": 179.6
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "district": "Jammu",
+      "group": "Children",
+      "year": 2022,
+      "actual": 182.0,
+      "predicted": 168.5
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "Children",
+      "year": 2022,
+      "actual": 179.0,
+      "predicted": 178.7
+    },
+    {
+      "state": "Himachal Pradesh",
+      "district": "Shimla",
+      "group": "Women",
+      "year": 2022,
+      "actual": 147.0,
+      "predicted": 148.5
+    },
+    {
+      "state": "Odisha",
+      "district": "Sundargarh",
+      "group": "Children",
+      "year": 2022,
+      "actual": 146.0,
+      "predicted": 136.8
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "Children",
+      "year": 2022,
+      "actual": 139.0,
+      "predicted": 143.0
+    },
+    {
+      "state": "West Bengal",
+      "district": "24 Paraganas North",
+      "group": "Children",
+      "year": 2022,
+      "actual": 139.0,
+      "predicted": 121.7
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "group": "Children",
+      "year": 2022,
+      "actual": 138.0,
+      "predicted": 129.7
+    },
+    {
+      "state": "Punjab",
+      "district": "Ludhiana",
+      "group": "Women",
+      "year": 2022,
+      "actual": 136.0,
+      "predicted": 148.6
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 136.0,
+      "predicted": 135.1
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jodhpur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 127.0,
+      "predicted": 131.9
+    },
+    {
+      "state": "Karnataka",
+      "district": "Belagavi",
+      "group": "Children",
+      "year": 2022,
+      "actual": 114.0,
+      "predicted": 112.0
+    },
+    {
+      "state": "Tamil Nadu",
+      "district": "Tiruchirappalli",
+      "group": "Women",
+      "year": 2022,
+      "actual": 110.0,
+      "predicted": 119.4
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Women",
+      "year": 2022,
+      "actual": 103.0,
+      "predicted": 108.2
+    },
+    {
+      "state": "Rajasthan",
+      "district": "Jaipur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 90.0,
+      "predicted": 74.0
+    },
+    {
+      "state": "Himachal Pradesh",
+      "district": "Shimla",
+      "group": "Children",
+      "year": 2022,
+      "actual": 85.0,
+      "predicted": 76.1
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "group": "SC",
+      "year": 2022,
+      "actual": 83.0,
+      "predicted": 72.4
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "SC",
+      "year": 2022,
+      "actual": 75.0,
+      "predicted": 74.4
+    },
+    {
+      "state": "Tamil Nadu",
+      "district": "Tiruchirappalli",
+      "group": "Children",
+      "year": 2022,
+      "actual": 75.0,
+      "predicted": 83.6
+    },
+    {
+      "state": "Punjab",
+      "district": "Ludhiana",
+      "group": "Children",
+      "year": 2022,
+      "actual": 70.0,
+      "predicted": 70.0
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "SC",
+      "year": 2022,
+      "actual": 61.0,
+      "predicted": 73.2
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Women",
+      "year": 2022,
+      "actual": 48.0,
+      "predicted": 10.2
+    },
+    {
+      "state": "Punjab",
+      "district": "S.A.S Nagar",
+      "group": "Women",
+      "year": 2022,
+      "actual": 48.0,
+      "predicted": 19.5
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Indore",
+      "group": "SC",
+      "year": 2022,
+      "actual": 47.0,
+      "predicted": 45.8
+    },
+    {
+      "state": "Kerala",
+      "district": "Thiruvananthapuram",
+      "group": "SC",
+      "year": 2022,
+      "actual": 40.0,
+      "predicted": 37.4
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "group": "SC",
+      "year": 2022,
+      "actual": 38.0,
+      "predicted": 23.3
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Children",
+      "year": 2022,
+      "actual": 37.0,
+      "predicted": 10.4
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Nagpur",
+      "group": "SC",
+      "year": 2022,
+      "actual": 35.0,
+      "predicted": 33.5
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Women",
+      "year": 2022,
+      "actual": 26.0,
+      "predicted": 9.6
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Thane",
+      "group": "SC",
+      "year": 2022,
+      "actual": 22.0,
+      "predicted": 27.0
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "Children",
+      "year": 2022,
+      "actual": 21.0,
+      "predicted": 10.4
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Chhatrapati Sambhajinagar",
+      "group": "Women",
+      "year": 2022,
+      "actual": 20.0,
+      "predicted": 7.1
+    },
+    {
+      "state": "Tamil Nadu",
+      "district": "Tiruchirappalli",
+      "group": "SC",
+      "year": 2022,
+      "actual": 18.0,
+      "predicted": 19.9
+    },
+    {
+      "state": "Himachal Pradesh",
+      "district": "Shimla",
+      "group": "SC",
+      "year": 2022,
+      "actual": 18.0,
+      "predicted": 24.5
+    },
+    {
+      "state": "Karnataka",
+      "district": "Belagavi",
+      "group": "SC",
+      "year": 2022,
+      "actual": 17.0,
+      "predicted": 19.6
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "district": "Jammu",
+      "group": "Women",
+      "year": 2022,
+      "actual": 14.0,
+      "predicted": 9.4
+    },
+    {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "group": "Children",
+      "year": 2022,
+      "actual": 12.0,
+      "predicted": 6.0
+    },
+    {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "group": "Women",
+      "year": 2022,
+      "actual": 12.0,
+      "predicted": 16.4
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Aurangabad",
+      "group": "Children",
+      "year": 2022,
+      "actual": 12.0,
+      "predicted": 6.1
+    },
+    {
+      "state": "Karnataka",
+      "district": "Bengaluru Urban",
+      "group": "Children",
+      "year": 2022,
+      "actual": 12.0,
+      "predicted": 4.3
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "SC",
+      "year": 2022,
+      "actual": 12.0,
+      "predicted": 2.2
+    },
+    {
+      "state": "Odisha",
+      "district": "Cuttack",
+      "group": "Women",
+      "year": 2022,
+      "actual": 11.0,
+      "predicted": 6.2
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "Women",
+      "year": 2022,
+      "actual": 11.0,
+      "predicted": 6.5
+    },
+    {
+      "state": "Gujarat",
+      "district": "Ahmadabad",
+      "group": "Women",
+      "year": 2022,
+      "actual": 11.0,
+      "predicted": 7.7
+    },
+    {
+      "state": "Gujarat",
+      "district": "Vadodara",
+      "group": "Women",
+      "year": 2022,
+      "actual": 10.0,
+      "predicted": 8.7
+    },
+    {
+      "state": "Assam",
+      "district": "Kamrup Metro",
+      "group": "Women",
+      "year": 2022,
+      "actual": 10.0,
+      "predicted": 6.3
+    },
+    {
+      "state": "Gujarat",
+      "district": "Vadodara",
+      "group": "Children",
+      "year": 2022,
+      "actual": 10.0,
+      "predicted": 7.9
+    },
+    {
+      "state": "Karnataka",
+      "district": "Bengaluru Urban",
+      "group": "Women",
+      "year": 2022,
+      "actual": 9.0,
+      "predicted": 7.5
+    },
+    {
+      "state": "Delhi",
+      "district": "New Delhi",
+      "group": "SC",
+      "year": 2022,
+      "actual": 8.0,
+      "predicted": 2.1
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "district": "Jammu",
+      "group": "Women",
+      "year": 2022,
+      "actual": 8.0,
+      "predicted": 6.7
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "SC",
+      "year": 2022,
+      "actual": 7.0,
+      "predicted": 2.0
+    },
+    {
+      "state": "Assam",
+      "district": "Kamrup Metro",
+      "group": "Children",
+      "year": 2022,
+      "actual": 6.0,
+      "predicted": 4.6
+    },
+    {
+      "state": "Delhi",
+      "district": "North West",
+      "group": "SC",
+      "year": 2022,
+      "actual": 6.0,
+      "predicted": 2.0
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "dataset": {
+    "total_records": 21067,
+    "train_records": 17379,
+    "test_records": 3688,
+    "states": 36,
+    "districts": 700,
+    "features": 188,
+    "years": [
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ]
+  },
+  "paper": {
+    "title": "Fairness-Constrained Multi-Task Learning for Crime Prediction",
+    "subtitle": "Addressing Bias Against Vulnerable Populations",
+    "venue": "SRM Institute of Science and Technology, Delhi NCR Campus",
+    "team": [
+      "Rishabh Singh",
+      "Nehul Agarwal",
+      "Farah Masoodi",
+      "Archit Raghav"
+    ],
+    "guide": "Prof. Geetanjali Tyagi"
+  },
+  "groups": [
+    {
+      "name": "SC",
+      "records": 5323,
+      "categories": 39,
+      "color": "#64B5F6",
+      "desc": "Scheduled Castes \u2014 caste-based discrimination and social exclusion"
+    },
+    {
+      "name": "ST",
+      "records": 5101,
+      "categories": 39,
+      "color": "#81C784",
+      "desc": "Scheduled Tribes \u2014 geographic isolation, limited access to justice"
+    },
+    {
+      "name": "Women",
+      "records": 5322,
+      "categories": 43,
+      "color": "#FF7043",
+      "desc": "Gender-based crimes \u2014 domestic violence, sexual assault, harassment"
+    },
+    {
+      "name": "Children",
+      "records": 5321,
+      "categories": 52,
+      "color": "#FFB74D",
+      "desc": "Minors \u2014 trafficking, abuse, exploitation under POCSO Act"
+    }
+  ],
+  "top_states": [
+    {
+      "state": "Uttar Pradesh",
+      "avg": 237.3
+    },
+    {
+      "state": "Madhya Pradesh",
+      "avg": 232.9
+    },
+    {
+      "state": "Maharashtra",
+      "avg": 225.9
+    },
+    {
+      "state": "Rajasthan",
+      "avg": 223.0
+    },
+    {
+      "state": "Andhra Pradesh",
+      "avg": 212.3
+    },
+    {
+      "state": "West Bengal",
+      "avg": 198.1
+    },
+    {
+      "state": "Kerala",
+      "avg": 195.4
+    },
+    {
+      "state": "Delhi",
+      "avg": 194.4
+    },
+    {
+      "state": "Odisha",
+      "avg": 191.5
+    },
+    {
+      "state": "Haryana",
+      "avg": 187.6
+    }
+  ]
+}
