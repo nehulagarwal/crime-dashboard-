@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, CartesianGrid, Cell,
@@ -14,6 +14,13 @@ const GC = {
     SC: '#64B5F6', ST: '#81C784',
     Women: '#FF7043', Children: '#FFB74D'
 };
+
+// Normalise raw group labels from JSON → short display names
+function normGroup(raw) {
+    if (raw === 'Scheduled Castes') return 'SC';
+    if (raw === 'Scheduled Tribes') return 'ST';
+    return raw; // 'Women' and 'Children' already correct
+}
 
 function CustomTooltip({ active, payload, label }) {
     if (!active || !payload?.length) return null;
@@ -33,15 +40,56 @@ function CustomTooltip({ active, payload, label }) {
     );
 }
 
+// Stable jitter — computed once per component mount, not on every render
+function useStableJitter(samples) {
+    const ref = useRef(null);
+    if (ref.current === null || ref.current.length !== samples.length) {
+        const rng = mulberry32(12345);
+        ref.current = samples.map(s => ({
+            ...s,
+            _jx: (rng() - 0.5) * 6,
+            _jy: (rng() - 0.5) * 6,
+        }));
+    }
+    return ref.current;
+}
+
+// Simple seeded PRNG so jitter is deterministic
+function mulberry32(seed) {
+    return function () {
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
 export default function Predictions() {
     const [tab, setTab] = useState('By State');
     const [group, setGroup] = useState('All');
 
-    const samples = useMemo(() =>
+    // Normalise group labels once
+    const normSamples = useMemo(() =>
+        data.samples.map(s => ({ ...s, group: normGroup(s.group) })),
+        []
+    );
+
+    // Stable scatter data (jitter never changes)
+    const scatterBase = useStableJitter(normSamples);
+
+    // Filtered samples for the selected group
+    const filteredSamples = useMemo(() =>
+        group === 'All' ? normSamples : normSamples.filter(s => s.group === group),
+        [group, normSamples]
+    );
+
+    // Scatter data filtered by group
+    const scatterData = useMemo(() =>
         group === 'All'
-            ? data.samples
-            : data.samples.filter(s => s.group === group),
-        [group]);
+            ? scatterBase
+            : scatterBase.filter(s => s.group === group),
+        [group, scatterBase]
+    );
 
     return (
         <Page>
@@ -59,14 +107,14 @@ export default function Predictions() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <span style={{ fontSize: 20 }}>★</span>
                     <span style={{ fontWeight: 800, fontSize: 16, color: '#ddd6fe' }}>
-                        FC-MT-LSTM — Our Model Results
+                        FC-MT-LSTM V5 — Results
                     </span>
                     <span style={{
                         fontSize: 11, background: 'rgba(167,139,250,0.2)',
                         color: '#c4b5fd', borderRadius: 20,
                         padding: '2px 10px', fontWeight: 600,
                     }}>
-                        Trained live on your machine
+                        Submitted Paper Numbers
                     </span>
                 </div>
 
@@ -93,7 +141,7 @@ export default function Predictions() {
                 </div>
             </div>
 
-            {/* ── Per group stat cards ──────────────────────────────────── */}
+            {/* ── Per-group stat cards ──────────────────────────────────── */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -102,10 +150,7 @@ export default function Predictions() {
                 {Object.entries(data.group_metrics).map(([g, v]) => (
                     <Card key={g} style={{ borderLeft: `3px solid ${GC[g]}` }}>
                         <div style={{ fontWeight: 700, color: GC[g], marginBottom: 10 }}>{g}</div>
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: '1fr 1fr',
-                            gap: 8,
-                        }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                             {[['MAE', v.mae], ['RMSE', v.rmse], ['R²', v.r2], ['Samples', v.count]].map(([l, val]) => (
                                 <div key={l} style={{
                                     background: '#0b1120', borderRadius: 6,
@@ -131,7 +176,7 @@ export default function Predictions() {
                 <Card>
                     <SectionTitle
                         title="Actual vs Predicted · State Level (2022)"
-                        sub="Average crimes per record across all groups"
+                        sub="Average crimes per record across all groups · top 20 states"
                     />
                     <ResponsiveContainer width="100%" height={340}>
                         <BarChart
@@ -151,11 +196,9 @@ export default function Predictions() {
                             <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="actual" fill="#ef4444" radius={[3, 3, 0, 0]} name="Actual" opacity={0.9} />
-                            <Bar dataKey="predicted" fill="#a78bfa" radius={[3, 3, 0, 0]} name="Predicted" opacity={0.9} />
+                            <Bar dataKey="predicted" fill="#a78bfa" radius={[3, 3, 0, 0]} name="FC-MT-LSTM Pred." opacity={0.9} />
                         </BarChart>
                     </ResponsiveContainer>
-
-                    {/* Legend */}
                     <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'center' }}>
                         {[['Actual 2022', '#ef4444'], ['FC-MT-LSTM Predicted', '#a78bfa']].map(([l, c]) => (
                             <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -172,7 +215,7 @@ export default function Predictions() {
                 <Card>
                     <SectionTitle
                         title="Actual vs Predicted Scatter"
-                        sub="Perfect model = all dots on the diagonal line · colored by group"
+                        sub="Perfect model = all dots on the diagonal · colored by group · 100 balanced samples"
                     />
                     <div style={{ marginBottom: 12 }}>
                         <Select
@@ -182,29 +225,48 @@ export default function Predictions() {
                             onChange={setGroup}
                         />
                     </div>
+
+                    {/* Group count indicator */}
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+                        {['SC', 'ST', 'Women', 'Children'].map(g => {
+                            const cnt = scatterData.filter(s => s.group === g).length;
+                            return (
+                                <div key={g} style={{
+                                    background: `${GC[g]}15`,
+                                    border: `1px solid ${GC[g]}44`,
+                                    borderRadius: 20, padding: '3px 10px',
+                                    fontSize: 11, color: GC[g], fontWeight: 600,
+                                }}>
+                                    {g}: {cnt}
+                                </div>
+                            );
+                        })}
+                    </div>
+
                     <ResponsiveContainer width="100%" height={360}>
                         <ScatterChart margin={{ left: 10, right: 20, top: 10, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                             <XAxis
                                 type="number" dataKey="actual" name="Actual"
+                                domain={['auto', 'auto']}
                                 tick={{ fontSize: 10, fill: '#64748b' }}
-                                label={{ value: 'Actual →', position: 'insideBottom', offset: -12, fill: '#64748b', fontSize: 11 }}
+                                label={{ value: 'Actual →', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 11 }}
                             />
                             <YAxis
                                 type="number" dataKey="predicted" name="Predicted"
+                                domain={['auto', 'auto']}
                                 tick={{ fontSize: 10, fill: '#64748b' }}
-                                label={{ value: 'Predicted', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11 }}
+                                label={{ value: 'Predicted ↑', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11 }}
                             />
                             <Tooltip content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
                                 const d = payload[0]?.payload;
                                 return (
                                     <div style={{
-                                        background: '#111827',
-                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        background: '#111827', border: '1px solid rgba(255,255,255,0.08)',
                                         borderRadius: 8, padding: '8px 12px', fontSize: 12,
                                     }}>
-                                        <div style={{ fontWeight: 700, color: GC[d.group], marginBottom: 4 }}>
+                                        <div style={{ fontWeight: 700, color: GC[d.group] || '#a78bfa', marginBottom: 4 }}>
                                             {d.group} · {d.district}
                                         </div>
                                         <div style={{ color: '#94a3b8', marginBottom: 4 }}>{d.state}</div>
@@ -215,18 +277,16 @@ export default function Predictions() {
                             }} />
                             <ReferenceLine
                                 segment={[{ x: 0, y: 0 }, { x: 800, y: 800 }]}
-                                stroke="rgba(255,255,255,0.15)"
-                                strokeDasharray="6 3"
+                                stroke="rgba(255,255,255,0.15)" strokeDasharray="6 3"
                             />
-                            <Scatter data={samples} opacity={0.75}>
-                                {samples.map((s, i) => (
+                            <Scatter data={scatterData} opacity={0.7}>
+                                {scatterData.map((s, i) => (
                                     <Cell key={i} fill={GC[s.group] || '#a78bfa'} />
                                 ))}
                             </Scatter>
                         </ScatterChart>
                     </ResponsiveContainer>
 
-                    {/* Legend */}
                     <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
                         {['SC', 'ST', 'Women', 'Children'].map(g => (
                             <div key={g} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -242,8 +302,8 @@ export default function Predictions() {
             {tab === 'Records Table' && (
                 <Card>
                     <SectionTitle
-                        title="Top 100 Records · Highest Actual Crimes"
-                        sub="Sorted by actual crime count · shows how close predictions are"
+                        title="Balanced Sample — All 4 Groups (2022)"
+                        sub="25 highest-crime records per group · colored error: green <10%, yellow <30%, red >30%"
                     />
                     <div style={{ marginBottom: 12 }}>
                         <Select
@@ -270,7 +330,7 @@ export default function Predictions() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {samples.slice(0, 50).map((s, i) => {
+                                {filteredSamples.map((s, i) => {
                                     const err = s.actual > 0
                                         ? Math.abs(s.predicted - s.actual) / s.actual * 100
                                         : 0;

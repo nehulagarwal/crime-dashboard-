@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Overview from './pages/Overview';
@@ -9,11 +9,9 @@ import Predictions from './pages/Predictions';
 import Models from './pages/Models';
 import Fairness from './pages/Fairness';
 
-
-
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
 
       <Navbar />
 
@@ -30,7 +28,7 @@ function App() {
         </Routes>
       </div>
 
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

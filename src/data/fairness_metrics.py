@@ -16,14 +16,14 @@ class FairnessEvaluator:
     def __init__(self, protected_groups: List[str] = None):
         """
         Initialize fairness evaluator
-        
+
         Args:
             protected_groups: List of protected group names
         """
         if protected_groups is None:
             # Updated to include all protected groups in the dataset: SC, ST, Women, Children
             # Note: 'General' is not present in the current dataset but kept for backward compatibility
-            self.protected_groups = ['SC', 'ST', 'General', 'Women', 'Children']
+            self.protected_groups = ['SC', 'ST', 'Women', 'Children']
         else:
             self.protected_groups = protected_groups
     

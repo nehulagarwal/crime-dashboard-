@@ -1,503 +1,239 @@
 import React, { useState } from 'react';
+import { Page, PageTitle, Card, SectionTitle, StatCard, TabBar } from '../components/UI';
 import {
-    BarChart, Bar, XAxis, YAxis, Tooltip,
-    ResponsiveContainer, Cell, CartesianGrid,
-    RadarChart, Radar, PolarGrid,
-    PolarAngleAxis, PolarRadiusAxis,
+    RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    Tooltip, Legend
 } from 'recharts';
-import { Page, PageTitle, Card, SectionTitle, TabBar } from '../components/UI';
+import data from '../data/predictions.json';
 
-const GC = {
-    SC: '#64B5F6', ST: '#81C784',
-    Women: '#FF7043', Children: '#FFB74D',
+
+
+// ── Exact paper numbers ────────────────────────────────────────────────────
+const GROUP_METRICS = {
+    SC: { mae: 2.46, rmse: 4.21, r2: 0.9730, count: 934, color: '#64B5F6' },
+    ST: { mae: 1.70, rmse: 2.38, r2: 0.9877, count: 890, color: '#81C784' },
+    Women: { mae: 5.39, rmse: 8.94, r2: 0.9993, count: 933, color: '#FF7043' },
+    Children: { mae: 5.53, rmse: 12.17, r2: 0.9974, count: 931, color: '#FFB74D' },
 };
 
-// ── Exact numbers from paper Table 5 ─────────────────────────────────
-const GROUP_METRICS = [
-    { group: 'SC', mae: 2.08, rmse: 3.15, r2: 0.9673, color: '#64B5F6' },
-    { group: 'ST', mae: 1.40, rmse: 1.54, r2: 0.0000, color: '#81C784' },
-    { group: 'Women', mae: 7.89, rmse: 10.81, r2: 0.9981, color: '#FF7043' },
-    { group: 'Children', mae: 14.01, rmse: 29.12, r2: 0.9852, color: '#FFB74D' },
+const OVERALL = { mae: 3.79, rmse: 9.83, r2: 0.9980, fairness_ratio: 3.26, fairness_gap: 3.84 };
+
+// Baseline fairness ratios from Table 5
+const BASELINE_FAIRNESS = [
+    { name: 'SARIMA', fairness_ratio: 1.17, color: '#94a3b8' },
+    { name: 'Prophet', fairness_ratio: 1.22, color: '#64748b' },
+    { name: 'Transformer', fairness_ratio: 3.51, color: '#ec4899' },
+    { name: 'FC-MT-LSTM', fairness_ratio: 3.26, color: '#f97316' },
+    { name: 'Random Forest', fairness_ratio: 12.28, color: '#3b82f6' },
+    { name: 'XGBoost', fairness_ratio: 10.81, color: '#06b6d4' },
+    { name: 'CNN-LSTM', fairness_ratio: 27.04, color: '#8b5cf6' },
 ];
 
-// Fairness ratios across all models
-const FAIRNESS_DATA = [
-    { model: 'SARIMA', ratio: 1.17, gap: 20.85, color: '#64B5F6' },
-    { model: 'Prophet', ratio: 1.22, gap: 17.60, color: '#60A5FA' },
-    { model: 'Random Forest', ratio: 4.74, gap: 1.08, color: '#FCD34D' },
-    { model: 'XGBoost', ratio: 3.73, gap: 0.81, color: '#F59E0B' },
-    { model: 'FC-MT-LSTM', ratio: 1.99, gap: 12.61, color: '#A78BFA', is_ours: true },
-];
+const radarData = ['MAE (inv)', 'RMSE (inv)', 'R²'].map(metric => {
+    const row = { metric };
+    Object.entries(GROUP_METRICS).forEach(([g, m]) => {
+        if (metric === 'MAE (inv)') row[g] = Math.max(0, 1 - m.mae / 10) * 100;
+        if (metric === 'RMSE (inv)') row[g] = Math.max(0, 1 - m.rmse / 20) * 100;
+        if (metric === 'R²') row[g] = m.r2 * 100;
+    });
+    return row;
+});
 
-function CustomTooltip({ active, payload, label }) {
-    if (!active || !payload?.length) return null;
-    return (
-        <div style={{
-            background: '#111827',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 8, padding: '8px 12px',
-        }}>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{label}</div>
-            {payload.map((p, i) => (
-                <div key={i} style={{ color: p.color || '#f1f5f9', fontSize: 12, fontWeight: 600 }}>
-                    {p.name}: {typeof p.value === 'number' ? p.value.toFixed(4) : p.value}
-                </div>
-            ))}
-        </div>
-    );
-}
+const TABS = ['Overview', 'Per-Group Detail', 'Baseline Comparison'];
 
 export default function Fairness() {
-    const [tab, setTab] = useState('Per Group');
+    const [tab, setTab] = useState('Overview');
 
-    // Radar data — normalise MAE so radar looks meaningful
-    const maxMAE = Math.max(...GROUP_METRICS.map(g => g.mae));
-    const radarData = GROUP_METRICS.map(g => ({
-        group: g.group,
-        MAE: parseFloat(((g.mae / maxMAE) * 100).toFixed(1)),
-        RMSE: parseFloat(((g.rmse / Math.max(...GROUP_METRICS.map(x => x.rmse))) * 100).toFixed(1)),
-        'R² Score': parseFloat((g.r2 * 100).toFixed(1)),
-    }));
+    const maes = Object.values(GROUP_METRICS).map(m => m.mae);
+    const maxMAE = Math.max(...maes);
+    const minMAE = Math.min(...maes);
 
     return (
         <Page>
             <PageTitle
                 title="⚖️ Fairness Analysis"
-                sub="FC-MT-LSTM per-group breakdown · Paper Table 5 · Why fairness matters"
+                sub="FC-MT-LSTM V5 · Fairness Ratio 3.26 · 62% better than CNN-LSTM"
             />
 
-            {/* ── What is fairness banner ───────────────────────────────── */}
-            <div style={{
-                background: 'rgba(52,211,153,0.06)',
-                border: '1px solid rgba(52,211,153,0.2)',
-                borderRadius: 14, padding: 20, marginBottom: 20,
-            }}>
-                <div style={{
-                    fontWeight: 700, color: '#34d399',
-                    fontSize: 14, marginBottom: 8,
-                }}>
-                    💡 What is Fairness in ML?
-                </div>
-                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7, margin: 0 }}>
-                    A model is <b style={{ color: '#f1f5f9' }}>unfair</b> if it predicts
-                    well for one group but poorly for another.
-                    For example — if a model predicts crimes against Women with MAE=2
-                    but crimes against Children with MAE=50, policymakers would
-                    over-allocate resources to Women and under-protect Children.
-                    The <b style={{ color: '#34d399' }}>Fairness Ratio</b> measures this:
-                    it is the ratio of the worst group's error to the best group's error.
-                    A ratio of <b style={{ color: '#34d399' }}>1.0 = perfectly fair</b>.
-                    FC-MT-LSTM achieves <b style={{ color: '#a78bfa' }}>1.99</b> vs
-                    Random Forest's <b style={{ color: '#f87171' }}>4.74</b>.
-                </p>
+            {/* Key stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+                <StatCard value={OVERALL.fairness_ratio} label="Fairness Ratio" color="#f97316" />
+                <StatCard value={OVERALL.fairness_gap} label="Fairness Gap" color="#a78bfa" />
+                <StatCard value={Math.min(...Object.values(GROUP_METRICS).map(m => m.mae)).toFixed(2)} label="Best Group MAE" color="#81C784" />
+                <StatCard value={Math.max(...Object.values(GROUP_METRICS).map(m => m.mae)).toFixed(2)} label="Worst Group MAE" color="#FFB74D" />
             </div>
 
-            <TabBar
-                tabs={['Per Group', 'Fairness Ratio', 'Radar', 'Why It Matters']}
-                active={tab}
-                onChange={setTab}
-            />
+            <TabBar tabs={TABS} active={tab} onChange={setTab} />
 
-            {/* ── Tab 1 : Per Group ─────────────────────────────────────── */}
-            {tab === 'Per Group' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-                    {/* group cards */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                        gap: 12,
-                    }}>
-                        {GROUP_METRICS.map(g => (
-                            <Card key={g.group} style={{ borderLeft: `3px solid ${g.color}` }}>
-                                <div style={{
-                                    fontWeight: 700, color: g.color,
-                                    fontSize: 15, marginBottom: 12,
-                                }}>
-                                    {g.group}
-                                </div>
-                                <div style={{
-                                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
-                                }}>
-                                    {[['MAE', g.mae], ['RMSE', g.rmse], ['R²', g.r2]].map(([l, v]) => (
-                                        <div key={l} style={{
-                                            background: '#0b1120', borderRadius: 6,
-                                            padding: '8px', textAlign: 'center',
-                                        }}>
-                                            <div style={{ fontSize: 15, fontWeight: 800, color: g.color }}>
-                                                {v}
-                                            </div>
-                                            <div style={{ fontSize: 9, color: '#64748b', marginTop: 2 }}>
-                                                {l}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-
-                    {/* MAE bar chart per group */}
-                    <Card>
+            {/* ── Overview ─────────────────────────────────────────────────── */}
+            {tab === 'Overview' && (
+                <>
+                    <Card style={{ marginBottom: 16 }}>
                         <SectionTitle
-                            title="MAE per Group — FC-MT-LSTM"
-                            sub="From paper Table 5 · Children hardest to predict"
+                            title="What is Fairness Ratio?"
+                            sub="max(group MAE) / min(group MAE) · closer to 1.0 = more fair"
                         />
-                        <ResponsiveContainer width="100%" height={260}>
-                            <BarChart
-                                data={GROUP_METRICS}
-                                margin={{ left: 0, right: 10, top: 5, bottom: 10 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="group" tick={{ fontSize: 11, fill: '#64748b' }} />
-                                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="mae" radius={[5, 5, 0, 0]} name="MAE">
-                                    {GROUP_METRICS.map((g, i) => (
-                                        <Cell key={i} fill={g.color} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Card>
-
-                    {/* RMSE bar chart */}
-                    <Card>
-                        <SectionTitle
-                            title="RMSE per Group — FC-MT-LSTM"
-                            sub="Children also have highest RMSE — more variance in predictions"
-                        />
-                        <ResponsiveContainer width="100%" height={240}>
-                            <BarChart
-                                data={GROUP_METRICS}
-                                margin={{ left: 0, right: 10, top: 5, bottom: 10 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="group" tick={{ fontSize: 11, fill: '#64748b' }} />
-                                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="rmse" radius={[5, 5, 0, 0]} name="RMSE">
-                                    {GROUP_METRICS.map((g, i) => (
-                                        <Cell key={i} fill={g.color} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Card>
-                </div>
-            )}
-
-            {/* ── Tab 2 : Fairness Ratio ────────────────────────────────── */}
-            {tab === 'Fairness Ratio' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <Card>
-                        <SectionTitle
-                            title="Fairness Ratio Across Models"
-                            sub="Ratio = worst group MAE ÷ best group MAE · closer to 1.0 = fairer"
-                        />
-                        <ResponsiveContainer width="100%" height={280}>
-                            <BarChart
-                                data={FAIRNESS_DATA}
-                                margin={{ left: 0, right: 10, top: 5, bottom: 60 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                                <XAxis
-                                    dataKey="model"
-                                    tick={{ fontSize: 9, fill: '#64748b' }}
-                                    angle={-30}
-                                    textAnchor="end"
-                                    interval={0}
-                                />
-                                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="ratio" radius={[5, 5, 0, 0]} name="Fairness Ratio">
-                                    {FAIRNESS_DATA.map((m, i) => (
-                                        <Cell
-                                            key={i}
-                                            fill={m.is_ours ? '#a78bfa' : m.color}
-                                            opacity={0.9}
-                                        />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-
-                        {/* annotation */}
-                        <div style={{
-                            marginTop: 12,
-                            display: 'flex', flexDirection: 'column', gap: 8,
-                        }}>
-                            {FAIRNESS_DATA.map(m => (
-                                <div key={m.model} style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '130px 1fr auto',
-                                    gap: 10, alignItems: 'center',
-                                }}>
-                                    <span style={{
-                                        fontSize: 11,
-                                        color: m.is_ours ? '#ddd6fe' : '#94a3b8',
-                                        fontWeight: m.is_ours ? 700 : 400,
-                                    }}>
-                                        {m.is_ours ? '★ ' : ''}{m.model}
-                                    </span>
-                                    <div style={{
-                                        background: '#0b1120', borderRadius: 3,
-                                        height: 6, overflow: 'hidden',
-                                    }}>
-                                        <div style={{
-                                            width: `${(m.ratio / 5) * 100}%`,
-                                            height: '100%',
-                                            background: m.is_ours ? '#a78bfa' : m.color,
-                                            borderRadius: 3,
-                                        }} />
-                                    </div>
-                                    <span style={{
-                                        fontSize: 12, fontWeight: 700,
-                                        color: m.is_ours ? '#a78bfa' : m.color,
-                                        minWidth: 32, textAlign: 'right',
-                                    }}>
-                                        {m.ratio}
-                                    </span>
-                                </div>
-                            ))}
+                        <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>
+                            <p>The Fairness Ratio measures how much worse the model is for the worst-predicted group compared to the best-predicted group.</p>
+                            <p>Our FC-MT-LSTM achieves <strong style={{ color: '#f97316' }}>Fairness Ratio = 3.26</strong>, meaning the Children group (MAE=5.53) is only 3.26x worse than the ST group (MAE=1.70). This is achieved through:</p>
                         </div>
-                    </Card>
-
-                    {/* insight card */}
-                    <Card>
-                        <SectionTitle
-                            title="Key Insight"
-                            sub="What these fairness ratios mean in practice"
-                        />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
                             {[
-                                {
-                                    model: 'Random Forest (4.74×)',
-                                    color: '#FCD34D',
-                                    insight: 'The worst-served group gets nearly 5× higher prediction error. If deployed for resource allocation, one group would be severely under-protected.',
-                                },
-                                {
-                                    model: 'XGBoost (3.73×)',
-                                    color: '#F59E0B',
-                                    insight: 'Still 3.7× disparity. Despite excellent overall MAE of 1.83, one group always bears a disproportionate error burden.',
-                                },
-                                {
-                                    model: 'FC-MT-LSTM (1.99×) ★',
-                                    color: '#A78BFA',
-                                    insight: 'Our model limits the worst group to only 2× the best group\'s error — nearly halving RF\'s disparity while keeping R²=0.9922.',
-                                },
-                            ].map(b => (
-                                <div key={b.model} style={{
-                                    display: 'flex', gap: 12, padding: 12,
-                                    background: '#0b1120', borderRadius: 8,
-                                    border: `1px solid ${b.color}22`,
+                                ['Pairwise Fairness Loss', 'λ=1.5 penalty on inter-group MAE disparity during training', '#f97316'],
+                                ['2x Capacity Decoders', 'Women and Children decoders have 128 hidden units vs 64 for SC/ST', '#FF7043'],
+                                ['Shared Encoder', 'ST group learns from Women group patterns through shared representation', '#64B5F6'],
+                                ['AdamW + Warmup', '5-epoch LR warmup + CosineAnnealing prevents overfitting to majority groups', '#81C784'],
+                            ].map(([title, desc, color]) => (
+                                <div key={title} style={{
+                                    background: '#0b1120', borderRadius: 8, padding: 12,
+                                    borderLeft: `3px solid ${color}`,
                                 }}>
-                                    <div style={{
-                                        width: 3, borderRadius: 2,
-                                        background: b.color, flexShrink: 0,
-                                    }} />
-                                    <div>
-                                        <div style={{
-                                            fontWeight: 700, color: b.color,
-                                            fontSize: 12, marginBottom: 4,
-                                        }}>
-                                            {b.model}
-                                        </div>
-                                        <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, margin: 0 }}>
-                                            {b.insight}
-                                        </p>
-                                    </div>
+                                    <div style={{ fontSize: 12, fontWeight: 600, color, marginBottom: 3 }}>{title}</div>
+                                    <div style={{ fontSize: 11, color: '#64748b' }}>{desc}</div>
                                 </div>
                             ))}
                         </div>
                     </Card>
-                </div>
+
+                    <Card>
+                        <SectionTitle
+                            title="Radar Chart — Per-Group Performance"
+                            sub="All 4 groups across MAE, RMSE, R² — higher = better"
+                        />
+                        <ResponsiveContainer width="100%" height={300}>
+                            <RadarChart data={radarData}>
+                                <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                                <PolarAngleAxis dataKey="metric" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                                <PolarRadiusAxis tick={{ fill: '#64748b', fontSize: 9 }} domain={[0, 100]} />
+                                {Object.entries(GROUP_METRICS).map(([g, m]) => (
+                                    <Radar key={g} name={g} dataKey={g}
+                                        stroke={m.color} fill={m.color} fillOpacity={0.12}
+                                        strokeWidth={2} />
+                                ))}
+                                <Legend formatter={(v) => <span style={{ color: GROUP_METRICS[v]?.color, fontSize: 11 }}>{v}</span>} />
+                                <Tooltip
+                                    contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+                                    formatter={(v) => [`${v.toFixed(1)}%`]}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </Card>
+                </>
             )}
 
-            {/* ── Tab 3 : Radar ─────────────────────────────────────────── */}
-            {tab === 'Radar' && (
+            {/* ── Per-Group Detail ─────────────────────────────────────────── */}
+            {tab === 'Per-Group Detail' && (
                 <Card>
                     <SectionTitle
-                        title="Per-Group Performance Radar"
-                        sub="FC-MT-LSTM · All 4 groups · Normalised scores"
+                        title="Per-Group Metrics — Table 6"
+                        sub="FC-MT-LSTM V5 on 3,688 test records (2022)"
                     />
-                    <ResponsiveContainer width="100%" height={340}>
-                        <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
-                            <PolarGrid stroke="rgba(255,255,255,0.08)" />
-                            <PolarAngleAxis
-                                dataKey="group"
-                                tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 600 }}
-                            />
-                            <PolarRadiusAxis
-                                angle={30} domain={[0, 100]}
-                                tick={{ fontSize: 9, fill: '#475569' }}
-                            />
-                            <Radar
-                                name="MAE (normalised)"
-                                dataKey="MAE"
-                                stroke="#ef4444" fill="#ef4444" fillOpacity={0.15}
-                            />
-                            <Radar
-                                name="RMSE (normalised)"
-                                dataKey="RMSE"
-                                stroke="#f97316" fill="#f97316" fillOpacity={0.10}
-                            />
-                            <Radar
-                                name="R² Score"
-                                dataKey="R² Score"
-                                stroke="#34d399" fill="#34d399" fillOpacity={0.15}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                        </RadarChart>
-                    </ResponsiveContainer>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        {Object.entries(GROUP_METRICS).map(([group, m]) => (
+                            <div key={group} style={{
+                                background: '#0b1120', borderRadius: 10, padding: 16,
+                                border: `1px solid ${m.color}22`,
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                                    <span style={{ color: m.color, fontWeight: 700, fontSize: 15 }}>{group}</span>
+                                    <span style={{ color: '#475569', fontSize: 11 }}>{m.count.toLocaleString()} records</span>
+                                </div>
 
-                    {/* radar legend */}
-                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8 }}>
-                        {[
-                            ['MAE (norm)', '#ef4444'],
-                            ['RMSE (norm)', '#f97316'],
-                            ['R² Score', '#34d399'],
-                        ].map(([l, c]) => (
-                            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: 2, background: c }} />
-                                <span style={{ fontSize: 11, color: '#64748b' }}>{l}</span>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
+                                    {[['MAE', m.mae.toFixed(2)], ['RMSE', m.rmse.toFixed(2)], ['R²', m.r2.toFixed(4)]].map(([l, v]) => (
+                                        <div key={l} style={{ textAlign: 'center', background: '#111827', borderRadius: 8, padding: 10 }}>
+                                            <div style={{ fontSize: 20, fontWeight: 800, color: m.color }}>{v}</div>
+                                            <div style={{ fontSize: 10, color: '#475569', marginTop: 2 }}>{l}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* MAE bar relative to max */}
+                                <div style={{ fontSize: 10, color: '#475569', marginBottom: 4 }}>
+                                    MAE relative to worst group ({maxMAE.toFixed(2)})
+                                </div>
+                                <div style={{ background: '#111827', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+                                    <div style={{
+                                        width: `${(m.mae / maxMAE) * 100}%`,
+                                        height: '100%', background: m.color, borderRadius: 4, opacity: 0.85,
+                                        transition: 'width 0.5s ease',
+                                    }} />
+                                </div>
                             </div>
                         ))}
                     </div>
 
                     <div style={{
-                        marginTop: 14, background: '#0b1120',
-                        borderRadius: 8, padding: 12,
-                        fontSize: 12, color: '#64748b', lineHeight: 1.6,
+                        marginTop: 16, padding: 14, background: '#0b1120', borderRadius: 10,
+                        border: '1px solid rgba(249,115,22,0.2)'
                     }}>
-                        📌 <b style={{ color: '#94a3b8' }}>Note:</b> ST group shows R²=0.0
-                        because test data for ST in 2022 had near-zero variance
-                        — the model predicted constant values for a nearly constant target.
-                        This is a data characteristic, not a model failure.
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#f97316', marginBottom: 6 }}>
+                            Fairness Ratio Calculation
+                        </div>
+                        <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.8 }}>
+                            Best group (ST): MAE = {minMAE.toFixed(2)}<br />
+                            Worst group (Children): MAE = {maxMAE.toFixed(2)}<br />
+                            Fairness Ratio = {maxMAE.toFixed(2)} / {minMAE.toFixed(2)} = <strong style={{ color: '#f97316' }}>3.26</strong><br />
+                            Fairness Gap = {maxMAE.toFixed(2)} - {minMAE.toFixed(2)} = <strong style={{ color: '#f97316' }}>3.84</strong>
+                        </div>
                     </div>
                 </Card>
             )}
 
-            {/* ── Tab 4 : Why it matters ────────────────────────────────── */}
-            {tab === 'Why It Matters' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <Card>
-                        <SectionTitle
-                            title="Real-World Impact of Unfair Predictions"
-                            sub="Why fairness in crime prediction is not just a metric"
-                        />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            {[
-                                {
-                                    icon: '🏛️',
-                                    title: 'Policy Decisions',
-                                    color: '#64B5F6',
-                                    text: 'Government bodies use crime predictions to allocate police, shelters, and legal aid. If predictions systematically underestimate crimes against Children, that group receives fewer resources.',
-                                },
-                                {
-                                    icon: '📊',
-                                    title: 'Resource Allocation',
-                                    color: '#FF7043',
-                                    text: 'A Random Forest model with fairness ratio 4.74 means one group has nearly 5× worse predictions. Over a year, this compounds into large under-protection of the worst-served group.',
-                                },
-                                {
-                                    icon: '⚖️',
-                                    title: 'Constitutional Obligation',
-                                    color: '#81C784',
-                                    text: 'SC and ST groups have constitutional protections under Indian law. An unfair model could violate these obligations if used in judicial or administrative decisions.',
-                                },
-                                {
-                                    icon: '🔬',
-                                    title: 'Our Contribution',
-                                    color: '#A78BFA',
-                                    text: 'FC-MT-LSTM\'s fairness-constrained loss directly encodes the obligation of equal treatment into the training process — making fairness a first-class objective, not an afterthought.',
-                                },
-                            ].map(b => (
-                                <div key={b.title} style={{
-                                    display: 'flex', gap: 14, padding: 14,
-                                    background: '#0b1120', borderRadius: 10,
-                                    border: `1px solid ${b.color}22`,
-                                }}>
-                                    <div style={{ fontSize: 24, flexShrink: 0 }}>{b.icon}</div>
-                                    <div>
-                                        <div style={{
-                                            fontWeight: 700, color: b.color,
-                                            fontSize: 13, marginBottom: 5,
-                                        }}>
-                                            {b.title}
-                                        </div>
-                                        <p style={{
-                                            fontSize: 12, color: '#64748b',
-                                            lineHeight: 1.7, margin: 0,
-                                        }}>
-                                            {b.text}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
+            {/* ── Baseline Comparison ──────────────────────────────────────── */}
+            {tab === 'Baseline Comparison' && (
+                <Card>
+                    <SectionTitle
+                        title="Fairness Ratio — All Models"
+                        sub="Lower = more fair · FC-MT-LSTM achieves best accuracy-fairness balance"
+                    />
+                    <ResponsiveContainer width="100%" height={320}>
+                        <BarChart
+                            data={[...BASELINE_FAIRNESS].sort((a, b) => a.fairness_ratio - b.fairness_ratio)}
+                            margin={{ top: 10, right: 20, left: 0, bottom: 60 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                            <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }}
+                                angle={-30} textAnchor="end" interval={0} />
+                            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} />
+                            <Tooltip
+                                contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+                                formatter={(v) => [v.toFixed(2), 'Fairness Ratio']}
+                            />
+                            <Bar dataKey="fairness_ratio" radius={[4, 4, 0, 0]}
+                                fill="#64748b"
+                                label={{
+                                    position: 'top', fill: '#94a3b8', fontSize: 10,
+                                    formatter: v => v.toFixed(2)
+                                }} />
+                        </BarChart>
+                    </ResponsiveContainer>
 
-                    {/* paper table 5 */}
-                    <Card>
-                        <SectionTitle
-                            title="Paper Table 5 — FC-MT-LSTM Per-Group Breakdown"
-                            sub="Exact numbers from the research paper"
-                        />
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                                <thead>
-                                    <tr style={{ background: '#0b1120' }}>
-                                        {['Group', 'MAE ↓', 'RMSE ↓', 'R² ↑', 'Interpretation'].map(col => (
-                                            <th key={col} style={{
-                                                padding: '10px 12px', textAlign: 'left',
-                                                color: '#64748b', fontSize: 11,
-                                                fontWeight: 600, textTransform: 'uppercase',
-                                                letterSpacing: 0.4,
-                                            }}>
-                                                {col}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {[
-                                        { ...GROUP_METRICS[0], note: 'Strong performance — model learns SC patterns well' },
-                                        { ...GROUP_METRICS[1], note: 'R²=0 due to near-zero variance in ST test data, not model failure' },
-                                        { ...GROUP_METRICS[2], note: 'Excellent R²=0.9981 — Women crimes most predictable' },
-                                        { ...GROUP_METRICS[3], note: 'Highest MAE — Children crimes most complex to predict' },
-                                    ].map((g, i) => (
-                                        <tr key={g.group} style={{
-                                            borderTop: '1px solid rgba(255,255,255,0.05)',
-                                        }}>
-                                            <td style={{ padding: '10px 12px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                    <div style={{
-                                                        width: 8, height: 8, borderRadius: '50%',
-                                                        background: g.color, flexShrink: 0,
-                                                    }} />
-                                                    <span style={{ fontWeight: 700, color: g.color }}>{g.group}</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '10px 12px', color: '#f1f5f9', fontWeight: 600 }}>
-                                                {g.mae}
-                                            </td>
-                                            <td style={{ padding: '10px 12px', color: '#f1f5f9', fontWeight: 600 }}>
-                                                {g.rmse}
-                                            </td>
-                                            <td style={{ padding: '10px 12px', color: '#34d399', fontWeight: 600 }}>
-                                                {g.r2}
-                                            </td>
-                                            <td style={{ padding: '10px 12px', color: '#64748b', fontSize: 11 }}>
-                                                {g.note}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </Card>
-                </div>
+                    <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {[
+                            ['vs Random Forest (12.28)', `${(((12.28 - 3.26) / 12.28) * 100).toFixed(0)}% improvement`, '#3b82f6'],
+                            ['vs XGBoost (10.81)', `${(((10.81 - 3.26) / 10.81) * 100).toFixed(0)}% improvement`, '#06b6d4'],
+                            ['vs CNN-LSTM (27.04)', `${(((27.04 - 3.26) / 27.04) * 100).toFixed(0)}% improvement`, '#8b5cf6'],
+                            ['vs Transformer (3.51)', `${(((3.51 - 3.26) / 3.51) * 100).toFixed(0)}% improvement`, '#ec4899'],
+                        ].map(([label, pct, color]) => (
+                            <div key={label} style={{
+                                display: 'flex', justifyContent: 'space-between',
+                                background: '#0b1120', borderRadius: 8, padding: '8px 14px',
+                                borderLeft: `3px solid ${color}`,
+                            }}>
+                                <span style={{ fontSize: 12, color: '#94a3b8' }}>{label}</span>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: '#f97316' }}>{pct}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ marginTop: 12, fontSize: 10, color: '#475569' }}>
+                        Note: SARIMA (1.17) and Prophet (1.22) have better fairness ratios but R²=0.000 and 0.191 —
+                        they achieve fairness by being equally wrong for all groups, which is not useful.
+                        FC-MT-LSTM achieves fairness while maintaining R²=0.9980.
+                    </div>
+                </Card>
             )}
         </Page>
     );

@@ -90,9 +90,9 @@ yearly = []
 for yr in sorted(all_data['year'].unique()):
     row = {"year": int(yr)}
     for g in GROUPS:
-        mask    = (all_data['year'] == yr) & (all_data['protected_group'] == g)
-        avg     = all_data.loc[mask, 'total_crimes'].mean()
-        row[g]  = round(float(avg), 1)
+        mask   = (all_data['year'] == yr) & (all_data['protected_group'] == g)
+        avg    = all_data.loc[mask, 'total_crimes'].mean()
+        row[g] = round(float(avg), 1)
     yearly.append(row)
 
 # top 10 states by average crimes
@@ -116,11 +116,39 @@ for state in top10:
         for y in sorted(sd['year'].unique())
     ]
 
+# ── NEW: heatmap data — per state, per group, per year ───────────────
+print("Generating heatmap data...")
+heatmap = {}
+all_states = sorted(all_data['state_name'].unique().tolist())
+
+for state in all_states:
+    heatmap[state] = {}
+    state_data = all_data[all_data['state_name'] == state]
+
+    # Total across all groups per year
+    heatmap[state]['Total'] = {}
+    for yr in sorted(all_data['year'].unique()):
+        yr_data = state_data[state_data['year'] == yr]
+        heatmap[state]['Total'][str(int(yr))] = round(
+            float(yr_data['total_crimes'].mean()), 1
+        ) if len(yr_data) > 0 else 0
+
+    # Per group per year
+    for g in GROUPS:
+        heatmap[state][g] = {}
+        g_data = state_data[state_data['protected_group'] == g]
+        for yr in sorted(all_data['year'].unique()):
+            yr_g_data = g_data[g_data['year'] == yr]
+            heatmap[state][g][str(int(yr))] = round(
+                float(yr_g_data['total_crimes'].mean()), 1
+            ) if len(yr_g_data) > 0 else 0
+
 trends = {
     "yearly"       : yearly,
     "top_states"   : top10,
     "state_trends" : state_trends,
-    "all_states"   : sorted(all_data['state_name'].unique().tolist())
+    "all_states"   : all_states,
+    "heatmap"      : heatmap
 }
 
 with open('trends.json', 'w') as f:

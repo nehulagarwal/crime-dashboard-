@@ -45,28 +45,31 @@ class RandomForestModel:
     def prepare_features(self, df: pd.DataFrame, fit=False):
         """
         Prepare features for Random Forest
-        
+
         Args:
             df: Input DataFrame
             fit: Whether to fit label encoders
-            
+
         Returns:
             Feature matrix X and target y
         """
         df_copy = df.copy()
-        
+
+        # Store original protected_group column before encoding for fairness evaluation
+        original_groups = df_copy['protected_group'].values.copy() if 'protected_group' in df_copy.columns else None
+
         # First, identify all object/string columns to encode
         string_cols = df_copy.select_dtypes(include=['object']).columns.tolist()
-        
+
         # Ensure our known categorical columns are in the string_cols
-        cat_cols = ['state_name', 'district_name', 'protected_group']
+        cat_cols = ['state_name', 'district_name']  # Exclude protected_group from encoding
         for col in cat_cols:
             if col not in string_cols and col in df_copy.columns:
                 string_cols.append(col)
-        
-        # Encode all categorical variables
+
+        # Encode only state_name and district_name, NOT protected_group
         for col in string_cols:
-            if col in df_copy.columns:  # Only process if column exists
+            if col in df_copy.columns and col != 'protected_group':  # Skip protected_group
                 if fit:
                     le = LabelEncoder()
                     df_copy[col] = le.fit_transform(df_copy[col].astype(str))
@@ -77,7 +80,7 @@ class RandomForestModel:
                         le = self.label_encoders[col]
                         unique_values = df_copy[col].unique()
                         mapped_values = {}
-                        
+
                         for val in unique_values:
                             val_str = str(val)
                             if val_str in le.classes_:
@@ -85,40 +88,40 @@ class RandomForestModel:
                             else:
                                 # Assign to the most common category from training
                                 mapped_values[val] = -1
-                        
+
                         df_copy[col] = df_copy[col].map(mapped_values)
                     else:
                         # If no encoder exists, assign to -1
                         df_copy[col] = -1
-        
+
         # Select feature columns
         if self.feature_cols is None:
             # Exclude target and identifiers
-            exclude_cols = ['total_crimes', 'year', 'state_code', 'district_code']
-            self.feature_cols = [col for col in df_copy.columns 
+            exclude_cols = ['total_crimes', 'year', 'state_code', 'district_code', 'protected_group']
+            self.feature_cols = [col for col in df_copy.columns
                                 if col not in exclude_cols]
-        
+
         X = df_copy[self.feature_cols].values
         y = df_copy['total_crimes'].values if 'total_crimes' in df_copy.columns else None
-        
+
         # Ensure all X values are numeric
         X = np.array(X, dtype=np.float64)
-        
-        return X, y
+
+        return X, y, original_groups
     
     def fit(self, train_df: pd.DataFrame):
         """
         Fit Random Forest model
-        
+
         Args:
             train_df: Training data
         """
         print("\nPreparing training features...")
-        X_train, y_train = self.prepare_features(train_df, fit=True)
-        
+        X_train, y_train, _ = self.prepare_features(train_df, fit=True)
+
         print(f"  Training shape: {X_train.shape}")
         print(f"  Features: {len(self.feature_cols)}")
-        
+
         print("\nTraining Random Forest model...")
         self.model = RandomForestRegressor(
             n_estimators=self.n_estimators,
@@ -128,30 +131,34 @@ class RandomForestModel:
             random_state=self.random_state,
             n_jobs=-1
         )
-        
+
         self.model.fit(X_train, y_train)
         print("  ✓ Training complete")
-    
+
     def predict(self, test_df: pd.DataFrame) -> pd.DataFrame:
         """
         Make predictions
-        
+
         Args:
             test_df: Test data
-            
+
         Returns:
             DataFrame with predictions
         """
         print("\nGenerating predictions...")
-        X_test, _ = self.prepare_features(test_df, fit=False)
-        
+        X_test, _, original_groups = self.prepare_features(test_df, fit=False)
+
         predictions = self.model.predict(X_test)
         predictions = np.maximum(predictions, 0)  # Ensure non-negative
-        
+
         result_df = test_df.copy()
         result_df['predicted'] = predictions
         result_df['actual'] = test_df['total_crimes']
         
+        # Preserve original group labels for fairness evaluation
+        if original_groups is not None:
+            result_df['protected_group'] = original_groups
+
         print(f"  ✓ Generated {len(predictions)} predictions")
         return result_df
     
