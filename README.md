@@ -176,6 +176,3 @@ python run_predictions.py
 * Archit Raghav
 
 **Guide:** Prof. Geetanjali Tyagi
-
-
-Give it a ⭐ on GitHub!
